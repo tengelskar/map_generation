@@ -114,18 +114,21 @@ function main(){
   map = convert_values(noise, width, height, 255);
   display_map(ctx, map, width, height);
 
-  noise2 = random_noise_lower_granularity(width, height, 4);
-  map2 = convert_values(noise2, width, height, 255);
-  display_map(document.getElementById("canvas2").getContext("2d"), map2, width, height);
-
-  combined_noise = combine_maps(noise, noise2, width, height, 0.7);
+  noise2 = random_noise_lower_granularity(width, height, 8);
+  combined_noise = combine_maps(noise, noise2, width, height, 0.4);
   map3 = convert_values(combined_noise, width, height, 255);
-  display_map(document.getElementById("canvas3").getContext("2d"), map3, width, height);
+  display_map(document.getElementById("canvas2").getContext("2d"), map3, width, height);
 
-  noise3 = random_noise(width, height);
-  combined_noise2 = combine_maps(combined_noise, noise3, width, height, 0.5);
+
+  noise3 = random_noise_lower_granularity(width, height, 4);
+  combined_noise2 = combine_maps(combined_noise, noise3, width, height, 0.07);
   map4 = convert_values(combined_noise2, width, height, 255);
-  display_map(document.getElementById("canvas4").getContext("2d"), map4, width, height);
+  display_map(document.getElementById("canvas3").getContext("2d"), map4, width, height);
+
+  noise4 = random_noise_lower_granularity(width, height, 2);
+  combined_noise3 = combine_maps(combined_noise2, noise4, width, height, 0.03);
+  map5  = convert_values(combined_noise3, width, height, 255);
+  display_map(document.getElementById("canvas4").getContext("2d"), map5, width, height);
 }
 
 window.onload = function(){
