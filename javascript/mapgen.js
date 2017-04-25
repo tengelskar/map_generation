@@ -46,7 +46,7 @@ function correct_val(val){
   }
   return val;
 }
-//damping is a number between 0...1
+//damping is a number between 0...1, and
 function combine_maps(map1, map2, width, height, damping){
   var arr = generate_2D_arr(width, height);
   var x,y;
@@ -54,15 +54,9 @@ function combine_maps(map1, map2, width, height, damping){
     for(y=0;y<height;y++){
       h1 = map1[x][y];
       h2 = map2[x][y];
-      av_h = (h1+h2)/2;
-      if(av_h < h1){
-        r = h1 - ((h1-av_h)*damping);
-        arr[x][y] = correct_val(r);
-      }
-      else{
-        r = h1 + ((h1-av_h)*damping);
-        arr[x][y] = correct_val(r);
-      }
+      new_h = ((1-damping)*h1)+(damping*h2)
+
+      arr[x][y]=correct_val(new_h)
 
     }
   }
@@ -81,20 +75,60 @@ function convert_values(old_map, width, height, multiplier){
 }
 
 function calc_greytone(val){
-  if(val >255){val = 255;}
-  if(val <0){val = 0;}
+  if(val >255){val = 255.0;}
+  if(val <0){val = 0.0;}
   number_as_string = Math.floor(val).toString(16).toUpperCase();
   return   "#"+number_as_string+number_as_string+number_as_string;
 }
 
-function display_map(ctx, map, width, height){
+function display_map(canvasId, map, width, height){
   console.log(map);
+  ctx = document.getElementById(canvasId).getContext("2d");
   ctx.canvas.width = width;
   ctx.canvas.height = height;
   var x,y;
   for (x = 0; x<width;x++){
     for (y=0;y<height;y++){
-      ctx.fillStyle = calc_greytone(map[x][y])
+      ctx.fillStyle = calc_greytone(map[x][y]);
+      ctx.fillRect(x,y,1,1);
+    }
+  }
+  ctx.stroke();
+
+}
+var WATER_LEVEL = 0.3*255;
+var DESERT_LEVEL = 0.75*255;
+var GRASS_LEVEL = 0.60*255;
+var MOUNTAIN_LEVEL = 1.0*255;
+var water_color = "#0000FF"
+var desert_color = "#F0E68C"
+var grass_color = "#00FF00"
+var mountain_color = "#808080"
+function lookup_color(num){
+  if (num < WATER_LEVEL){
+    return water_color;
+  }
+  if (num<GRASS_LEVEL){
+    return grass_color;
+  }
+  if (num < DESERT_LEVEL){
+    return desert_color;
+  }
+  if (num < GRASS_LEVEL){
+    return grass_color;
+  }
+  return mountain_color;
+}
+
+function colorize_map(canvasId, map, width, height){
+  console.log(map);
+  ctx = document.getElementById(canvasId).getContext("2d");
+  ctx.canvas.width = width;
+  ctx.canvas.height = height;
+  var x,y;
+  for (x = 0; x<width;x++){
+    for (y=0;y<height;y++){
+      ctx.fillStyle = lookup_color(map[x][y]);
       ctx.fillRect(x,y,1,1);
     }
   }
@@ -102,33 +136,38 @@ function display_map(ctx, map, width, height){
 
 }
 
-
-
 function main(){
-  var canvas = document.getElementById("canvas");
-  console.log(canvas);
-  var ctx = canvas.getContext('2d');
-  var width = 511;
-  var height = 511;
-  noise = random_noise_lower_granularity(width, height,16);
-  map = convert_values(noise, width, height, 255);
-  display_map(ctx, map, width, height);
-
+  var width = 512;
+  var height = 512;
+  //generate low res noise
+  noise1 = random_noise_lower_granularity(width, height,16);
+  //generate noise of 2 times the frequency
   noise2 = random_noise_lower_granularity(width, height, 8);
-  combined_noise = combine_maps(noise, noise2, width, height, 0.4);
-  map3 = convert_values(combined_noise, width, height, 255);
-  display_map(document.getElementById("canvas2").getContext("2d"), map3, width, height);
-
-
+  //generate noise of 4 times the frequency
   noise3 = random_noise_lower_granularity(width, height, 4);
-  combined_noise2 = combine_maps(combined_noise, noise3, width, height, 0.07);
-  map4 = convert_values(combined_noise2, width, height, 255);
-  display_map(document.getElementById("canvas3").getContext("2d"), map4, width, height);
-
+  //generate noise of 8 times frequency
   noise4 = random_noise_lower_granularity(width, height, 2);
-  combined_noise3 = combine_maps(combined_noise2, noise4, width, height, 0.03);
-  map5  = convert_values(combined_noise3, width, height, 255);
-  display_map(document.getElementById("canvas4").getContext("2d"), map5, width, height);
+
+
+  //combine the noise of noise1 and noise2
+  combined_noise1 = combine_maps(noise1, noise2, width, height, 0.4);
+  //combine combined_noise 1 with noise3
+  combined_noise2 = combine_maps(combined_noise1, noise3, width, height, 0.2);
+  combined_noise3 = combine_maps(combined_noise2, noise4, width, height, 0.1);
+
+  map1 = convert_values(noise1, width, height, 255);
+  map2 = convert_values(noise2, width, height, 255);
+  map3 = convert_values(combined_noise1, width, height, 255);
+  map4 = convert_values(combined_noise2, width, height, 255);
+  map5 = convert_values(combined_noise3, width, height, 255);
+  noise4_map = convert_values(noise4, width, height, 255);
+  display_map("canvas", map1, width, height);
+  display_map("canvas2", map2, width, height)
+  display_map("canvas3", map3, width, height);
+  display_map("canvas4", map4, width, height);
+  display_map("canvas5", map5, width, height);
+  colorize_map("canvas6",map5, width, height);
+  colorize_map("canvas7", noise4_map, width, height, 255);
 }
 
 window.onload = function(){
