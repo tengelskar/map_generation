@@ -1,0 +1,12 @@
+#game-screen-wrapper{
+  display:block;
+  text-align: center;
+  border-width: 3px;
+  border-color: black;
+  border-style:dashed;
+}
+#game-screen{
+  background-color: grey;
+  display: block;
+  margin:0 auto;
+}
