@@ -1,4 +1,4 @@
-/*Created by Maren and Tengel*/
+/*Created by Maren Sofie Ringsby and Tengel Ekrem Skar*/
 var viewpoint_x = 0;
 var viewpoint_y = 0;
 var viewpoint_r = 0;
